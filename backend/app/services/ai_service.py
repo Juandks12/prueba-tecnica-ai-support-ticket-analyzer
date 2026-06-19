@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "mock").lower()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 
 # Inicializar clientes condicionalmente para evitar errores si las keys están vacías
 genai_client = None
@@ -39,6 +40,22 @@ elif LLM_PROVIDER == "openai":
             LLM_PROVIDER = "mock"
     else:
         logger.warning("OPENAI_API_KEY no configurada. Se usará modo 'mock'.")
+        LLM_PROVIDER = "mock"
+
+elif LLM_PROVIDER == "deepseek":
+    if DEEPSEEK_API_KEY:
+        try:
+            from openai import OpenAI
+            openai_client = OpenAI(
+                api_key=DEEPSEEK_API_KEY,
+                base_url="https://api.deepseek.com"
+            )
+            logger.info("Cliente de DeepSeek inicializado correctamente.")
+        except Exception as e:
+            logger.error(f"Error al inicializar cliente de DeepSeek: {e}. Se usará modo 'mock'.")
+            LLM_PROVIDER = "mock"
+    else:
+        logger.warning("DEEPSEEK_API_KEY no configurada. Se usará modo 'mock'.")
         LLM_PROVIDER = "mock"
 
 
@@ -171,6 +188,30 @@ Información del ticket a analizar:
             logger.error(f"Error llamando a OpenAI: {e}. Usando mock como alternativa.")
             return get_mock_enrichment(subject, description, product, ticket_type)
 
+    elif LLM_PROVIDER == "deepseek" and openai_client:
+        try:
+            response = openai_client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "system", "content": "Eres un asistente experto que responde exclusivamente en formato JSON válido, sin markdown ni explicaciones."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            raw = response.choices[0].message.content.strip()
+            if raw.startswith("```"):
+                raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+            data = json.loads(raw)
+            return {
+                "category": data.get("category", "Technical Issue"),
+                "priority": data.get("priority", "Medium"),
+                "summary": data.get("summary", "Resumen automático de soporte"),
+                "sentiment": data.get("sentiment", "Neutral"),
+                "team": data.get("team", "Soporte Técnico")
+            }
+        except Exception as e:
+            logger.error(f"Error llamando a DeepSeek: {e}. Usando mock como alternativa.")
+            return get_mock_enrichment(subject, description, product, ticket_type)
+
     return get_mock_enrichment(subject, description, product, ticket_type)
 
 
@@ -224,6 +265,20 @@ Responde de forma clara, profesional y concisa en español. Si te preguntan esta
         except Exception as e:
             logger.error(f"Error en /ask llamando a OpenAI: {e}")
             return f"Error al procesar la respuesta con OpenAI: {str(e)}"
+
+    elif LLM_PROVIDER == "deepseek" and openai_client:
+        try:
+            response = openai_client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "system", "content": "Eres un asistente de análisis de tickets y soporte de negocio. Responde en español."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            logger.error(f"Error en /ask llamando a DeepSeek: {e}")
+            return f"Error al procesar la respuesta con DeepSeek: {str(e)}"
 
     # Mock Ask (Fallback / Modo Mock)
     logger.info("Respondiendo con el motor de respuestas heurístico (modo Mock).")

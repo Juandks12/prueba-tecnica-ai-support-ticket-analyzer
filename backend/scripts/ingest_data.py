@@ -154,7 +154,7 @@ def run_ingestion():
 
     # Si estamos en modo LLM real, limitamos la cantidad de tickets enriquecidos por LLM real
     # para no exceder las cuotas ni presupuestos gratis en la primera corrida, el resto va por mock.
-    llm_enrichment_limit = 40 if LLM_PROVIDER in ["gemini", "openai"] else len(df)
+    llm_enrichment_limit = 40 if LLM_PROVIDER in ["gemini", "openai", "deepseek"] else len(df)
     logger.info(f"Proveedor de LLM seleccionado: '{LLM_PROVIDER}'.")
     if LLM_PROVIDER != "mock":
         logger.info(f"Se procesarán los primeros {llm_enrichment_limit} tickets con el LLM real, y el resto con el motor de reglas heurístico para cuidar tu cuota.")
