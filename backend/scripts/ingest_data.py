@@ -140,6 +140,10 @@ def run_ingestion():
     # Leer CSV
     df = pd.read_csv(csv_path)
     logger.info(f"Dataset cargado. Total de filas: {len(df)}")
+    
+    # Limpiar duplicados por Ticket ID y resetear el índice
+    df = df.drop_duplicates(subset=['Ticket ID'], keep='first').reset_index(drop=True)
+    logger.info(f"Dataset limpio de duplicados. Total de filas únicas: {len(df)}")
 
     # Crear tablas
     logger.info("Reiniciando tablas en la base de datos SQLite...")
