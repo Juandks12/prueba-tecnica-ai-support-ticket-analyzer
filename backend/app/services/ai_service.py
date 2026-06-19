@@ -180,7 +180,7 @@ def ask_question(question: str, context_tickets: List[Dict[str, Any]], policies_
     # Formatear el contexto de los tickets resumidos
     formatted_tickets = ""
     for idx, t in enumerate(context_tickets[:20]): # Limitar a 20 tickets más representativos por contexto
-        formatted_tickets += f"- ID {t['ticket_id']}: [{t['ai_priority']}] {t['ai_category']} | Cliente: {t['customer_name']} ({t['customer_age']} años) | Producto: {t['product_purchased']} | Asunto: {t['ticket_subject']} | Descripción: {t['ticket_description']} | Resumen IA: {t['ai_summary']} | Equipo: {t['ai_team']} | Estado: {t['ticket_status']} | Calificación: {t.get('customer_satisfaction_rating', 'N/A')}\n"
+        formatted_tickets += f"- ID {t['ticket_id']}: [{t['ai_priority']}] {t['ai_category']} | Cliente: {t['customer_name']} ({t.get('customer_age', 'N/A')} años) | Producto: {t['product_purchased']} | Asunto: {t['ticket_subject']} | Descripción: {t['ticket_description']} | Resumen IA: {t['ai_summary']} | Equipo: {t['ai_team']} | Estado: {t['ticket_status']} | Calificación: {t.get('customer_satisfaction_rating', 'N/A')}\n"
 
     prompt = f"""Eres un Analista de Soporte con Inteligencia Artificial. Tu tarea es responder preguntas de negocio sobre los tickets de soporte del cliente.
 Para responder, debes basarte en la Base de Conocimiento (Políticas de Soporte y SLA) y el Contexto de los tickets cargados a continuación.

@@ -149,6 +149,7 @@ def ask_ai(req: QuestionRequest, db: Session = Depends(get_db)):
         tickets_list.append({
             "ticket_id": t.ticket_id,
             "customer_name": t.customer_name,
+            "customer_age": t.customer_age,
             "product_purchased": t.product_purchased,
             "ticket_subject": t.ticket_subject,
             "ticket_description": t.ticket_description,
