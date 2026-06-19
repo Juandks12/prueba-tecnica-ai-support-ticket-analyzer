@@ -104,6 +104,25 @@ function setupEventListeners() {
     document.getElementById('agent-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendAgentQuestion();
     });
+
+    // Toggle de proveedor IA (Mock / DeepSeek)
+    const providerToggle = document.getElementById('provider-toggle');
+    if (providerToggle) {
+        providerToggle.addEventListener('change', () => {
+            const mockLabel = document.querySelector('.mock-label');
+            const deepseekLabel = document.querySelector('.deepseek-label');
+            const providerTag = document.getElementById('llm-provider-tag');
+            if (providerToggle.checked) {
+                mockLabel.classList.remove('active');
+                deepseekLabel.classList.add('active');
+                if (providerTag) providerTag.textContent = 'LLM: DeepSeek';
+            } else {
+                mockLabel.classList.add('active');
+                deepseekLabel.classList.remove('active');
+                if (providerTag) providerTag.textContent = 'LLM: Mock';
+            }
+        });
+    }
 }
 
 // --- CONSUMO DE LA API ---
@@ -199,16 +218,19 @@ async function sendAgentQuestion() {
     if (!question) return;
 
     input.value = '';
+
+    const providerToggle = document.getElementById('provider-toggle');
+    const provider = providerToggle && providerToggle.checked ? 'deepseek' : 'mock';
+    const providerLabel = provider === 'deepseek' ? 'DeepSeek' : 'Mock';
     appendChatMessage('user', question);
 
-    // Burbuja de carga
-    const loaderId = appendChatMessage('bot', '<em>Pensando y consultando base de conocimientos...</em>');
+    const loaderId = appendChatMessage('bot', `<em>Consultando con ${providerLabel}...</em>`);
 
     try {
         const response = await fetch(`${API_BASE}/ask`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question: question })
+            body: JSON.stringify({ question: question, provider: provider })
         });
         
         const loaderBubble = document.getElementById(loaderId);

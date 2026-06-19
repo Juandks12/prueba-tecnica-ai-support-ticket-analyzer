@@ -96,7 +96,7 @@
                 <div class="header-actions">
                     <div class="system-status">
                         <span class="status-indicator online"></span>
-                        <span id="llm-provider-tag" class="status-text">LLM: DeepSeek</span>
+                        <span id="llm-provider-tag" class="status-text">LLM: Mock</span>
                     </div>
                 </div>
             </header>
@@ -157,6 +157,14 @@
                         <span class="badge badge-accent">Preguntas</span>
                     </div>
                     <div class="agent-chat-container">
+                        <div class="chat-provider-toggle">
+                            <span class="toggle-label mock-label active">Mock</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="provider-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label deepseek-label">DeepSeek</span>
+                        </div>
                         <div class="chat-history" id="chat-history">
                             <div class="chat-message bot">
                                 <div class="message-bubble">

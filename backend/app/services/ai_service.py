@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 # Configurar logs
 logging.basicConfig(level=logging.INFO)
@@ -215,8 +215,10 @@ Información del ticket a analizar:
     return get_mock_enrichment(subject, description, product, ticket_type)
 
 
-def ask_question(question: str, context_tickets: List[Dict[str, Any]], policies_text: str) -> str:
+def ask_question(question: str, context_tickets: List[Dict[str, Any]], policies_text: str, force_provider: Optional[str] = None) -> str:
     """Responde preguntas en lenguaje natural utilizando el contexto de los tickets y las políticas."""
+    
+    effective_provider = force_provider if force_provider else LLM_PROVIDER
     
     # Formatear el contexto de los tickets resumidos
     formatted_tickets = ""
@@ -241,7 +243,7 @@ PREGUNTA DEL USUARIO:
 Responde de forma clara, profesional y concisa en español. Si te preguntan estadísticas generales o de qué se quejan más, haz un breve desglose cuantitativo basándote en los datos recibidos. Si la respuesta no se puede deducir del contexto provisto, indícalo educadamente.
 """
 
-    if LLM_PROVIDER == "gemini" and genai_client:
+    if effective_provider == "gemini" and genai_client:
         try:
             response = genai_client.models.generate_content(
                 model='gemini-2.5-flash',
@@ -252,7 +254,7 @@ Responde de forma clara, profesional y concisa en español. Si te preguntan esta
             logger.error(f"Error en /ask llamando a Gemini: {e}")
             return f"Error al procesar la respuesta con Gemini: {str(e)}. (Modo LLM activo pero fallando)"
 
-    elif LLM_PROVIDER == "openai" and openai_client:
+    elif effective_provider == "openai" and openai_client:
         try:
             response = openai_client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -266,7 +268,7 @@ Responde de forma clara, profesional y concisa en español. Si te preguntan esta
             logger.error(f"Error en /ask llamando a OpenAI: {e}")
             return f"Error al procesar la respuesta con OpenAI: {str(e)}"
 
-    elif LLM_PROVIDER == "deepseek" and openai_client:
+    elif effective_provider == "deepseek" and openai_client:
         try:
             response = openai_client.chat.completions.create(
                 model="deepseek-chat",

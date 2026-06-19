@@ -494,6 +494,76 @@ input[type="text"]:focus, select:focus {
     flex-grow: 1;
 }
 
+/* Toggle de proveedor IA */
+.chat-provider-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.75rem;
+    background: var(--bg-input);
+}
+
+.toggle-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color 0.25s;
+    user-select: none;
+}
+
+.toggle-label.active {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 2.75rem;
+    height: 1.5rem;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--color-primary);
+    border-radius: 1.5rem;
+    transition: background 0.3s;
+}
+
+.toggle-slider::before {
+    content: "";
+    position: absolute;
+    height: 1.05rem;
+    width: 1.05rem;
+    left: 0.225rem;
+    bottom: 0.225rem;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: var(--color-accent);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(1.25rem);
+}
+
 /* --- TABLA DE TICKETS --- */
 .card-table-section {
     display: flex;

@@ -31,6 +31,7 @@ app.add_middleware(
 
 class QuestionRequest(BaseModel):
     question: str
+    provider: Optional[str] = None
 
 
 @app.get("/")
@@ -166,7 +167,8 @@ def ask_ai(req: QuestionRequest, db: Session = Depends(get_db)):
         answer = ai_service.ask_question(
             question=req.question,
             context_tickets=tickets_list,
-            policies_text=policies_text
+            policies_text=policies_text,
+            force_provider=req.provider
         )
         return {"answer": answer}
     except Exception as e:

@@ -12,9 +12,13 @@ La solución está construida sobre los siguientes pilares técnicos:
 2.  **Servidor Web y Proxy Inverso ([nginx.conf](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/frontend/nginx.conf)):** Nginx actúa como servidor de archivos estáticos para el Dashboard y como proxy inverso, redirigiendo todas las llamadas `/api/*` al backend de forma transparente para evitar problemas de CORS.
 3.  **Backend REST API ([main.py](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/backend/app/main.py)):** Desarrollado con FastAPI por su alto rendimiento físico, facilidad de validación con Pydantic y documentación interactiva automática en `/docs`.
 4.  **Limpieza y Normalización ([ingest_data.py](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/backend/scripts/ingest_data.py)):** El script de ingesta procesa y limpia el dataset [tickets.csv](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/tickets.csv) (normaliza correos, estandariza prioridades como `P4` o `Critical`, resuelve fechas complejas escritas en lenguaje verbal en español e inglés y formatea números de satisfacción).
-5.  **Motor de Inteligencia Artificial Dual ([ai_service.py](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/backend/app/services/ai_service.py)):** 
-    *   **Modo Productivo:** Conexión directa a **Gemini** (usando `google-genai` con el modelo `gemini-2.5-flash`) u **OpenAI** (usando `gpt-4o-mini`).
+5.  **Motor de Inteligencia Artificial Multi-Proveedor ([ai_service.py](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/backend/app/services/ai_service.py)):** 
+    *   **Modo Productivo (3 proveedores):**
+        *   **DeepSeek** — modelo `deepseek-chat` vía SDK de OpenAI apuntando a `https://api.deepseek.com`. Rápido, económico y con excelente soporte para español.
+        *   **Gemini** — usando `google-genai` con el modelo `gemini-2.5-flash`.
+        *   **OpenAI** — usando `gpt-4o-mini`.
     *   **Modo Simulador (Mock):** Sistema heurístico inteligente por reglas que clasifica, resume y asigna equipos al instante. **No requiere configurar API keys de pago para ejecutarse.**
+    *   **Toggle en el chat:** El dashboard incluye un interruptor para alternar entre **Mock** y **DeepSeek** en tiempo real, sin modificar variables de entorno ni reiniciar.
 6.  **Base de Conocimientos RAG ([knowledge_base/](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/knowledge_base/)):** Las políticas de SLA ([policies.md](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/knowledge_base/policies.md)) y las reglas de ruteo ([routing_rules.md](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/knowledge_base/routing_rules.md)) se inyectan en tiempo de ejecución junto con una muestra de tickets a los LLMs para responder preguntas de negocio complejas en el endpoint `/api/ask`.
 
 ---
@@ -23,7 +27,7 @@ La solución está construida sobre los siguientes pilares técnicos:
 
 ### Requisitos Previos
 - Tener instalado **Docker** y **Docker Compose**.
-- (Opcional) Una API Key de Google Gemini o de OpenAI si deseas usar modelos reales de IA.
+- (Opcional) Una API Key de **DeepSeek**, **Google Gemini** u **OpenAI** si deseas usar modelos reales de IA. El proyecto funciona completamente sin ellas gracias al modo Mock.
 
 ### Paso 1: Configurar Variables de Entorno
 Clona el archivo de configuración copiando el archivo de ejemplo:
@@ -31,10 +35,24 @@ Clona el archivo de configuración copiando el archivo de ejemplo:
 # Crea tu archivo .env local
 cp .env.example .env
 ```
-Por defecto, el archivo [.env](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/.env) viene configurado con `LLM_PROVIDER=mock`, lo que te permite probar toda la aplicación localmente sin gastar créditos. Si deseas activar la IA real, edita el archivo `.env` configurando:
+Por defecto, el archivo [.env](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/.env) viene configurado con `LLM_PROVIDER=mock`, lo que te permite probar toda la aplicación localmente sin gastar créditos. Si deseas activar la IA real, edita el archivo `.env` configurando uno de los siguientes proveedores:
+
+**Opción A — DeepSeek (recomendado):**
+```env
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=sk-tu_api_key_de_deepseek
+```
+
+**Opción B — Google Gemini:**
 ```env
 LLM_PROVIDER=gemini
 GEMINI_API_KEY=tu_api_key_de_gemini
+```
+
+**Opción C — OpenAI:**
+```env
+LLM_PROVIDER=openai
+OPENAI_API_KEY=sk-tu_api_key_de_openai
 ```
 
 ### Paso 2: Levantar el Proyecto con Docker Compose
@@ -52,16 +70,19 @@ Para limpiar los datos originales de [tickets.csv](file:///C:/Users/juand/Downlo
 1.  **Desde la Interfaz Gráfica:** Haz clic en el botón **"🔄 Iniciar Ingesta / Recargar"** ubicado en el panel lateral izquierdo del Dashboard.
 2.  **Mediante Comando en el Contenedor:**
     ```bash
-    docker exec -it ticket-analyzer-backend python scripts/ingest_data.py
+    docker exec ticket-analyzer-backend python scripts/ingest_data.py
     ```
+
+> **Nota sobre créditos:** Si configuraste un LLM real (`deepseek`, `gemini` u `openai`), los **primeros 40 tickets** se procesarán con IA real y los **360 restantes** con el motor de reglas heurístico (mock), para no exceder cuotas ni presupuestos gratuitos. Si usas `LLM_PROVIDER=mock`, los 400 tickets se procesan con reglas.
 
 ---
 
 ## 🖥️ Cómo Probar la Aplicación
 
 1.  **Dashboard de Control:** Abre tu navegador web e ingresa a `http://localhost:8080`. Verás el panel con métricas de KPI animadas, gráficos interactivos de Chart.js, buscador inteligente con filtros y una consola de chat de IA.
-2.  **Detalles del Ticket:** En la tabla de tickets, haz clic en el botón **"Ver Detalle"** en cualquier fila para abrir un modal con la información limpia del cliente, el resumen estructurado de la IA y el sentimiento detectado.
-3.  **Documentación Interactiva de la API:** Accede a `http://localhost:8000/docs` para ver e interactuar con Swagger UI y hacer peticiones de prueba a los endpoints directamente.
+2.  **Toggle Mock / DeepSeek:** En el panel de chat, usa el interruptor para alternar entre el **modo Mock** (respuestas heurísticas instantáneas y gratuitas) y **DeepSeek** (respuestas reales del modelo `deepseek-chat` analizando los tickets y políticas). El indicador `LLM:` en el header se actualiza automáticamente.
+3.  **Detalles del Ticket:** En la tabla de tickets, haz clic en el botón **"Ver Detalle"** en cualquier fila para abrir un modal con la información limpia del cliente, el resumen estructurado de la IA y el sentimiento detectado.
+4.  **Documentación Interactiva de la API:** Accede a `http://localhost:8000/docs` para ver e interactuar con Swagger UI y hacer peticiones de prueba a los endpoints directamente.
 
 ---
 
@@ -72,24 +93,25 @@ Para limpiar los datos originales de [tickets.csv](file:///C:/Users/juand/Downlo
 *   `GET /api/metrics`: Retorna métricas cuantitativas clave estructuradas para renderizar gráficos y KPI Cards.
 *   `POST /api/ingest`: Encola y ejecuta la limpieza e ingesta en segundo plano.
 *   `POST /api/ask`: Envía preguntas en lenguaje natural (RAG).
-    *   **Body JSON:** `{"question": "¿Cuáles son las prioridades críticas y qué SLA les aplica?"}`
+    *   **Body JSON:** `{"question": "¿Cuáles son las prioridades críticas y qué SLA les aplica?", "provider": "deepseek"}`
+    *   **`provider` (opcional):** `"mock"`, `"deepseek"`, `"gemini"` u `"openai"`. Permite elegir el motor de IA por consulta, sin modificar el `.env`. Si se omite, usa el proveedor configurado en `LLM_PROVIDER`.
     *   **Respuesta:** Genera una respuesta en español contextualizada en base a las políticas operativas del negocio y los datos reales de los tickets.
 
 ---
 
 ## 🤖 Uso de Inteligencia Artificial Durante el Desarrollo
 
-Para optimizar los tiempos de entrega y garantizar la solidez de la arquitectura, se adoptó un enfoque de **Desarrollo Aumentado por IA**:
+Para optimizar los tiempos de entrega y garantizar la solidez de la arquitectura, se adoptó un enfoque de **Desarrollo Aumentado por IA** usando **OpenCode** y modelos como **DeepSeek** y **Gemini**:
 
-1.  **Generación y Estructuración de Código:** Se utilizó el modelo Gemini para estructurar las rutas de FastAPI, definir la expresión regular del formateador de fechas complejas y diseñar las consultas agrupadas de SQLAlchemy.
+1.  **Generación y Estructuración de Código:** Se utilizaron modelos de IA para estructurar las rutas de FastAPI, definir la expresión regular del formateador de fechas complejas, diseñar las consultas agrupadas de SQLAlchemy, implementar la integración con DeepSeek y construir el toggle de proveedor en el chat del frontend.
 2.  **Diseño Estético (Vanilla CSS):** Se usó IA para definir una paleta de colores HSL consistente, estructurar el diseño responsivo basado en Grid/Flexbox y afinar las transiciones fluidas de los efectos de vidrio del Dashboard.
-3.  **Validación Manual:** Cada componente generado por IA fue revisado meticulosamente. Se corrigieron manualmente los enrutamientos de puertos de Docker, la inicialización condicional de los SDK de LLM y el refresco dinámico de Chart.js para evitar colisiones de Canvas.
+3.  **Validación Manual:** Cada componente generado o modificado por IA fue revisado meticulosamente. Se corrigieron manualmente los enrutamientos de puertos de Docker, la inicialización condicional de los SDK de LLM, la compatibilidad de versiones entre `openai` y `httpx`, y el refresco dinámico de Chart.js para evitar colisiones de Canvas.
 
 ---
 
 ## ⚠️ Limitaciones y Mejoras con Más Tiempo
 
 Si tuviera más tiempo de desarrollo, consideraría las siguientes mejoras de ingeniería:
-- **Indexación Vectorial (Vector DB):** Reemplazar la inyección directa de texto de tickets en el prompt por una base de datos vectorial como Chroma o PGVector, generando embeddings para realizar búsquedas semánticas más precisas en `/api/ask`.
+- **Integración con Azure Cloud:** Desplegar la solución en Azure Container Instances (ACI) o Azure Kubernetes Service (AKS), migrar SQLite a Azure SQL Database para entornos productivos multi-instancia, y agregar monitorización con Azure Application Insights.
 - **Pipeline de Ingesta Asíncrona:** Integrar Celery con Redis para manejar colas de tareas pesadas durante ingestas masivas de millones de registros, enviando notificaciones por WebSockets al frontend sobre el progreso.
 - **Autenticación y Roles:** Implementar OAuth2 con JWT en FastAPI para controlar qué agentes de soporte pueden gestionar, modificar o responder tickets sensibles.
