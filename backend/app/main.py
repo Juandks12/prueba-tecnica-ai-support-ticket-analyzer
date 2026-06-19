@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional
@@ -172,3 +173,12 @@ def ask_ai(req: QuestionRequest, db: Session = Depends(get_db)):
             status_code=500,
             detail=f"Error en el servicio de IA: {str(e)}"
         )
+
+# Servir archivos estáticos del frontend si existen en el entorno local
+frontend_dir = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "frontend",
+    "src"
+)
+if os.path.exists(frontend_dir):
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
