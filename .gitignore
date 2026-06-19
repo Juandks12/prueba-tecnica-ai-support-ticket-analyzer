@@ -1,0 +1,26 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Base de datos
+*.db
+app/db/
+tickets.db
+backend/app/db/
+
+# Configuración local sensible
+.env
+
+# IDEs y SO
+.vscode/
+.idea/
+.DS_Store
+*.log
