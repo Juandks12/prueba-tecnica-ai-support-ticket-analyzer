@@ -6,7 +6,7 @@ herramientas:
 | Herramienta | Modelo base | Rol en el desarrollo |
 |---|---|---|
 | **OpenCode** | DeepSeek V4 Pro | Agente principal: análisis de código, debugging, implementación de features, refactorización, documentación |
-| **Gemini** | gemini-2.5-flash | Bootstrapping inicial del proyecto: estructura FastAPI, parser de fechas, consultas SQLAlchemy |
+| **Gemini** | gemini-3.5-flash | Bootstrapping inicial del proyecto: estructura FastAPI, parser de fechas, consultas SQLAlchemy |
 | **DeepSeek** | deepseek-chat | Proveedor LLM del producto: enriquecimiento de tickets y chat RAG |
 
 ---
