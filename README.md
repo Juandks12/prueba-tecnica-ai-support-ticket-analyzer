@@ -11,7 +11,7 @@ La solución está construida sobre los siguientes pilares técnicos:
 1.  **Orquestación Multicontenedor ([docker-compose.yml](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/docker-compose.yml)):** Separa el Backend del Frontend emulando un entorno real de producción.
 2.  **Servidor Web y Proxy Inverso ([nginx.conf](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/frontend/nginx.conf)):** Nginx actúa como servidor de archivos estáticos para el Dashboard y como proxy inverso, redirigiendo todas las llamadas `/api/*` al backend de forma transparente para evitar problemas de CORS.
 3.  **Backend REST API ([main.py](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/backend/app/main.py)):** Desarrollado con FastAPI por su alto rendimiento físico, facilidad de validación con Pydantic y documentación interactiva automática en `/docs`.
-4.  **Limpieza y Normalización ([ingest_data.py](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/backend/scripts/ingest_data.py)):** El script de ingesta procesa y limpia el dataset [tickets.csv](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/tickets.csv) (normaliza correos, estandariza prioridades como `P4` o `Critical`, resuelve fechas complejas escritas en lenguaje verbal en español e inglés y formatea números de satisfacción).
+4.  **Limpieza y Normalización ([ingest_data.py](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/backend/scripts/ingest_data.py)):** El script de ingesta procesa y limpia el dataset [tickets.csv](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/dataset/tickets.csv) (normaliza correos, estandariza prioridades como `P4` o `Critical`, resuelve fechas complejas escritas en lenguaje verbal en español e inglés y formatea números de satisfacción).
 5.  **Motor de Inteligencia Artificial Multi-Proveedor ([ai_service.py](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/backend/app/services/ai_service.py)):** 
     *   **Modo Productivo (3 proveedores):**
         *   **DeepSeek** — modelo `deepseek-chat` vía SDK de OpenAI apuntando a `https://api.deepseek.com`. Rápido, económico y con excelente soporte para español.
@@ -69,7 +69,7 @@ Este comando levantará:
 - Creará un volumen compartido `db_data` para almacenar de forma persistente la base de datos SQLite `tickets.db`.
 
 ### Paso 3: Inicializar la Ingesta de Datos
-Para limpiar los datos originales de [tickets.csv](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/tickets.csv), analizarlos con la IA y guardarlos en la base de datos, puedes hacer una de las siguientes opciones:
+Para limpiar los datos originales de [tickets.csv](file:///C:/Users/juand/Downloads/prueba-tecnica-ai-support-ticket-analyzer/dataset/tickets.csv), analizarlos con la IA y guardarlos en la base de datos, puedes hacer una de las siguientes opciones:
 1.  **Desde la Interfaz Gráfica:** Haz clic en el botón **"🔄 Iniciar Ingesta / Recargar"** ubicado en el panel lateral izquierdo del Dashboard.
 2.  **Mediante Comando en el Contenedor:**
     ```bash
@@ -148,7 +148,7 @@ cd backend
 python scripts/ingest_data.py
 ```
 
-El script buscará `tickets.csv` automáticamente en la raíz del proyecto, limpiará los datos crudos, los enriquecerá con IA y los guardará en la base de datos SQLite (`tickets.db`).
+El script buscará `dataset/tickets.csv` automáticamente en la raíz del proyecto, limpiará los datos crudos, los enriquecerá con IA y los guardará en la base de datos SQLite (`tickets.db`).
 
 ### Paso 6: Acceder a la aplicación
 

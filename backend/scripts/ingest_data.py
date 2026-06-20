@@ -129,6 +129,7 @@ def run_ingestion():
         # Fallback para ejecución local de desarrollo
         csv_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+            "dataset",
             "tickets.csv"
         )
 

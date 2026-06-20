@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build:
@@ -11,7 +9,7 @@ services:
     volumes:
       - ./backend:/app
       - ./knowledge_base:/knowledge_base
-      - ./tickets.csv:/app/tickets.csv
+      - ./dataset/tickets.csv:/app/tickets.csv
     env_file:
       - .env
     environment:
