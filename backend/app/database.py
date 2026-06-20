@@ -14,9 +14,9 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./tickets.db")
 if DATABASE_URL.startswith("sqlite"):
     if not DATABASE_URL.startswith("sqlite:////"):
         db_rel_path = DATABASE_URL.replace("sqlite:///", "")
-        # Raíz del proyecto (directorio padre del backend)
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        db_abs_path = os.path.abspath(os.path.join(project_root, db_rel_path))
+        # Raíz del backend (2 niveles arriba desde backend/app/)
+        backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        db_abs_path = os.path.abspath(os.path.join(backend_root, db_rel_path))
         DATABASE_URL = f"sqlite:////{db_abs_path}"
 
     db_path = DATABASE_URL.replace("sqlite:////", "")

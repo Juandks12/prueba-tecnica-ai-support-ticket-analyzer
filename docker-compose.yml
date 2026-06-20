@@ -12,11 +12,9 @@ services:
       - ./backend:/app
       - ./knowledge_base:/knowledge_base
       - ./tickets.csv:/app/tickets.csv
-      - db_data:/app/db
     env_file:
       - .env
     environment:
-      - DATABASE_URL=sqlite:///app/db/tickets.db
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
 
@@ -32,6 +30,3 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
-
-volumes:
-  db_data:
