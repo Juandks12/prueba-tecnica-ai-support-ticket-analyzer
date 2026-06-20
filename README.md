@@ -199,7 +199,7 @@ El script buscará `dataset/tickets.csv` automáticamente en la raíz del proyec
 
 ## 🤖 Uso de Inteligencia Artificial Durante el Desarrollo
 
-Se adoptó un enfoque de **Desarrollo Aumentado por IA** usando **OpenCode** (con DeepSeek V4 Pro), **Gemini** (gemini-2.5-flash) y **DeepSeek** (deepseek-chat).
+Se adoptó un enfoque de **Desarrollo Aumentado por IA** usando **OpenCode** (con DeepSeek V4 Pro), **Gemini** (gemini-3.5-flash) y **DeepSeek** (deepseek-chat).
 
 | Herramienta | Rol principal |
 |---|---|
