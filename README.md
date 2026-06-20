@@ -199,11 +199,19 @@ El script buscará `dataset/tickets.csv` automáticamente en la raíz del proyec
 
 ## 🤖 Uso de Inteligencia Artificial Durante el Desarrollo
 
-Para optimizar los tiempos de entrega y garantizar la solidez de la arquitectura, se adoptó un enfoque de **Desarrollo Aumentado por IA** usando **OpenCode** y modelos como **DeepSeek** y **Gemini**:
+Se adoptó un enfoque de **Desarrollo Aumentado por IA** usando **OpenCode** (con DeepSeek V4 Pro), **Gemini** (gemini-2.5-flash) y **DeepSeek** (deepseek-chat).
 
-1.  **Generación y Estructuración de Código:** Se utilizaron modelos de IA para estructurar las rutas de FastAPI, definir la expresión regular del formateador de fechas complejas, diseñar las consultas agrupadas de SQLAlchemy, implementar la integración con DeepSeek y construir el toggle de proveedor en el chat del frontend.
-2.  **Diseño Estético (Vanilla CSS):** Se usó IA para definir una paleta de colores HSL consistente, estructurar el diseño responsivo basado en Grid/Flexbox y afinar las transiciones fluidas de los efectos de vidrio del Dashboard.
-3.  **Validación Manual:** Cada componente generado o modificado por IA fue revisado meticulosamente. Se corrigieron manualmente los enrutamientos de puertos de Docker, la inicialización condicional de los SDK de LLM, la compatibilidad de versiones entre `openai` y `httpx`, y el refresco dinámico de Chart.js para evitar colisiones de Canvas.
+| Herramienta | Rol principal |
+|---|---|
+| **OpenCode** | Agente de desarrollo: debugging, features, refactorización, documentación |
+| **Gemini** | Bootstrapping inicial: estructura FastAPI, parser de fechas, CSS |
+| **DeepSeek** | Proveedor LLM del producto y modelo subyacente de OpenCode |
+
+Las tareas incluyeron: estructuración del backend, parser de fechas en español, diseño del dashboard, integración del proveedor DeepSeek, corrección de incompatibilidad de versiones (`openai` vs `httpx`), sistema de toggle Mock/DeepSeek en el chat, reorganización de la estructura del proyecto, y documentación integral.
+
+Cada componente generado o modificado por IA fue validado manualmente: rutas de archivos en Docker vs local, resolución de `DATABASE_URL`, inicialización condicional de SDKs, formato JSON del LLM, refresco de Chart.js, proxy Nginx, timeouts de ingesta y encoding de caracteres.
+
+> **Documento completo:** [IA_EN_DESARROLLO.md](IA_EN_DESARROLLO.md) — incluye el detalle de cada tarea, qué herramienta se usó, qué se validó manualmente y las configuraciones de agentes utilizadas.
 
 ---
 
