@@ -17,7 +17,7 @@ herramientas:
 
 **Herramienta:** Gemini
 
-Gemini generó el esqueleto de FastAPI con rutas, modelos Pydantic, ORM de
+Gemini generó el esqueleto del proyecto FastAPI con rutas, modelos Pydantic, ORM de
 SQLAlchemy, el script de ingesta y la integración inicial con Gemini y OpenAI.
 Se validó manualmente la resolución de rutas de archivos en Docker vs ejecución
 local, la configuración de CORS y la inicialización condicional de los SDKs de
@@ -101,7 +101,7 @@ funcionaran correctamente tras cada cambio estructural.
 
 ### 8. Documentación integral
 
-**Herramienta:** OpenCode
+**Herramienta:** OpenCode y Manual
 
 OpenCode redactó y actualizó el `README.md` completo, incluyendo:
 - Guía de instalación y despliegue con Docker
