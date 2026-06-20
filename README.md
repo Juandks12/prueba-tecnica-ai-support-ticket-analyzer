@@ -56,6 +56,9 @@ OPENAI_API_KEY=sk-tu_api_key_de_openai
 ```
 
 ### Paso 2: Levantar el Proyecto con Docker Compose
+
+> **¿No usas Docker?** Ve directamente a la sección [Ejecución sin Docker (Manual)](#alternativa-ejecucion-sin-docker-manual).
+
 Ejecuta el siguiente comando en la raíz del proyecto para construir y arrancar las imágenes:
 ```bash
 docker compose up --build -d
@@ -74,6 +77,101 @@ Para limpiar los datos originales de [tickets.csv](file:///C:/Users/juand/Downlo
     ```
 
 > **Nota sobre créditos:** Si configuraste un LLM real (`deepseek`, `gemini` u `openai`), los **primeros 40 tickets** se procesarán con IA real y los **360 restantes** con el motor de reglas heurístico (mock), para no exceder cuotas ni presupuestos gratuitos. Si usas `LLM_PROVIDER=mock`, los 400 tickets se procesan con reglas.
+
+---
+
+## 🖥️ Alternativa: Ejecución sin Docker (Manual)
+
+Si prefieres no instalar Docker, puedes ejecutar el proyecto directamente con Python. Solo necesitas Python 3.9+ y pip.
+
+### Paso 1: Clonar y crear entorno virtual
+
+```bash
+git clone <url-del-repositorio>
+cd prueba-tecnica-ai-support-ticket-analyzer
+python -m venv venv
+```
+
+**Activar el entorno virtual:**
+```bash
+# Windows (PowerShell o CMD):
+venv\Scripts\activate
+
+# Linux / macOS:
+source venv/bin/activate
+```
+
+### Paso 2: Instalar dependencias
+
+```bash
+pip install -r backend/requirements.txt
+```
+
+Esto instala todos los paquetes listados en la tabla de arriba. La instalación toma aproximadamente 1-2 minutos.
+
+### Paso 3: Configurar variables de entorno
+
+```bash
+# Windows:
+copy .env.example .env
+
+# Linux / macOS:
+cp .env.example .env
+```
+
+Edita el archivo `.env` con tu editor de texto y configura el proveedor de IA deseado. Ejemplo con DeepSeek:
+
+```env
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=sk-tu_api_key_de_deepseek
+```
+
+Si no tienes una API key, deja `LLM_PROVIDER=mock` y el sistema usará respuestas simuladas.
+
+### Paso 4: Ejecutar el backend
+
+```bash
+cd backend
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Uvicorn arrancará en `http://localhost:8000`. El flag `--reload` reinicia el servidor automáticamente cuando detecta cambios en el código (ideal para desarrollo).
+
+El backend **sirve el frontend automáticamente** como archivos estáticos desde `frontend/src/`. No necesitas un servidor web adicional.
+
+### Paso 5: Ejecutar la ingesta de datos
+
+En **otra terminal**, con el entorno virtual activado y desde la raíz del proyecto:
+
+```bash
+cd backend
+python scripts/ingest_data.py
+```
+
+El script buscará `tickets.csv` automáticamente en la raíz del proyecto, limpiará los datos crudos, los enriquecerá con IA y los guardará en la base de datos SQLite (`tickets.db`).
+
+### Paso 6: Acceder a la aplicación
+
+| Recurso | URL |
+|---|---|
+| **Dashboard principal** | http://localhost:8000/index.html |
+| **API raíz (JSON)** | http://localhost:8000 |
+| **Documentación Swagger** | http://localhost:8000/docs |
+| **Tickets (API)** | http://localhost:8000/api/tickets |
+| **Métricas (API)** | http://localhost:8000/api/metrics |
+
+### Notas importantes para ejecución manual
+
+- **El dashboard funciona sin Nginx** porque el backend monta los archivos estáticos de `frontend/src/` en la raíz. La variable `API_BASE = '/api'` del frontend resuelve correctamente al compartir origen con el backend en `localhost:8000`.
+- **Base de datos:** `tickets.db` se crea automáticamente dentro de la carpeta `backend/` en la primera ejecución. Para reiniciar desde cero, borra ese archivo y vuelve a ejecutar la ingesta.
+- **Base de conocimientos:** Los archivos `knowledge_base/policies.md` y `knowledge_base/routing_rules.md` se cargan automáticamente. El backend los busca en la raíz del proyecto.
+- **Desarrollo del frontend:** Si necesitas modificar el frontend y ver cambios en tiempo real, puedes servir los archivos estáticos por separado con Python y editar `API_BASE` en `app.js` para apuntar al backend:
+  ```bash
+  cd frontend/src
+  python -m http.server 8080
+  # Edita app.js: const API_BASE = 'http://localhost:8000/api';
+  ```
+- La carpeta `venv/` está en `.gitignore` y no se sube al repositorio.
 
 ---
 
